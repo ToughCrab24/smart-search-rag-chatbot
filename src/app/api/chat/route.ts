@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const context = await getContext(lastMessage.content);
 
     // Map the context into a friendly text stream
-    const messageContext = context.data.find.documents.map((doc: any) => {
+    const messageContext = context.data.similarity.docs.map((doc: any) => {
       return `
         ID: ${doc.id}
         Title: ${doc.data.post_title}

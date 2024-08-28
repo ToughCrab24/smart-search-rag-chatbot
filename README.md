@@ -3,8 +3,7 @@ This is a WP Engine Smart search RAG chatbot sample source code derived from thi
 
 ## Getting Started
 
-
-First install the dependencies
+First install the dependencies:
 
 ```bash
 npm install
@@ -33,4 +32,5 @@ To learn more about WP Engine Smart Search, take a look at the following resourc
 - [WP Engine Smart Search](https://wpengine.com/smart-search/) - an overview of the product.
 - [API Docs](https://developers.wpengine.com/docs/wp-engine-smart-search/overview/) - documentation for the API's.
 
-## Deploy on Vercel
+## Deploy on WP Engine
+

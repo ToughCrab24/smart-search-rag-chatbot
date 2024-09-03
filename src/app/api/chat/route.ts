@@ -26,8 +26,12 @@ export async function POST(req: Request) {
     // Get the context from the last message
     const context = await getContext(lastMessage.content);
 
+    if (context.errors) {
+      throw new Error(context.errors[0].message);
+    }
+
     // Map the context into a friendly text stream
-    const messageContext = context.data.similarity.docs.map((doc: any) => {
+    const messageContext = context.data.similarity?.docs.map((doc: any) => {
       return `
         ID: ${doc.id}
         Title: ${doc.data.post_title}
@@ -47,7 +51,7 @@ export async function POST(req: Request) {
       AI assistant uses WP Engine Smart Search to provide the most accurate and relevant information to the user.
       AI assistant data from WP Engine Smart Search is based on TV Shows.
       START CONTEXT BLOCK
-      ${messageContext.join("----------------\n\n")}
+      ${messageContext?.join("----------------\n\n")}
       END OF CONTEXT BLOCK
 
       START OF HISTORY BLOCK

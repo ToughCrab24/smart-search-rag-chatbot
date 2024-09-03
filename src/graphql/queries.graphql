@@ -1,0 +1,18 @@
+query SimilaritySearch($input: SimilarityInput!) {
+  similarity(input: $input) {
+    total
+    docs {
+      id
+      score
+      data
+      innerDocs {
+        field
+        docs {
+          id
+          score
+          data
+        }
+      }
+    }
+  }
+}

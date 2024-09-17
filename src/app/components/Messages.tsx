@@ -20,7 +20,7 @@ export default function Messages({ messages }: { messages: Message[] }) {
           } my-2 p-3 shadow-md hover:shadow-lg transition-shadow duration-200 flex slide-in-bottom bg-blue-500 border border-gray-900 message-glow`}
         >
           <div className="ml- rounded-tl-lg  p-2 border-r flex items-center">
-            {msg.role === "assistant" ? "🤖" : "🧅"}
+            {msg.role === "assistant" ? "🤖" : "🧒🏻"}
           </div>
           <div className="ml-2 text-white">
             <ReactMarkdown>{msg.content}</ReactMarkdown>

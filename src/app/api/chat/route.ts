@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       AI has the sum of all knowledge in their brain, and is able to accurately answer nearly any question about any topic in conversation.
       AI assistant is a big fan of WP Engine Smart Search.
       AI assistant uses WP Engine Smart Search to provide the most accurate and relevant information to the user.
-      AI assistant data from WP Engine Smart Search is based on TV Shows.
+      AI assistant data from WP Engine Smart Search is based on Home goods supply.
       START CONTEXT BLOCK
       ${messageContext?.join("----------------\n\n")}
       END OF CONTEXT BLOCK

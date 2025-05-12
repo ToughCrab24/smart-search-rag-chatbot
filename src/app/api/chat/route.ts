@@ -2,16 +2,14 @@
 export const runtime = "edge";
 
 import { CoreMessage, streamText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 import { getContext } from "@/app/utils/context";
 
 /**
- * Initialize the OpenAI API
+ * Initialize the Google Generative AI API
  */
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const google = createGoogleGenerativeAI();
 
 export async function POST(req: Request) {
   try {
@@ -40,6 +38,7 @@ export async function POST(req: Request) {
       `;
     });
 
+
     const prompt: CoreMessage = {
       role: "assistant",
       content: `AI assistant is a brand new, powerful, human-like artificial intelligence.
@@ -67,14 +66,14 @@ export async function POST(req: Request) {
     };
 
     const response = await streamText({
-      model: openai("gpt-4o"),
+      model: google("models/gemini-2.0-flash"),
       messages: [
         prompt,
         ...messages.filter((message: CoreMessage) => message.role === "user"),
       ],
     });
     // Convert the response into a friendly text-stream
-    return response.toAIStreamResponse();
+    return response.toDataStreamResponse(); 
   } catch (e) {
     throw e;
   }

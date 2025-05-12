@@ -1,6 +1,6 @@
 "use client";
 import Chat from "./components/Chat";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 import { useEffect } from "react";
 
 const Page: React.FC = () => {

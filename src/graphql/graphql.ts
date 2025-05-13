@@ -20,6 +20,11 @@ export type Scalars = {
   Map: { input: any; output: any; }
 };
 
+export enum AccessLevel {
+  Full = 'FULL',
+  Search = 'SEARCH'
+}
+
 export type AggregateInput = {
   ranges?: InputMaybe<Array<InputMaybe<RangeAggregateInput>>>;
   terms?: InputMaybe<Array<InputMaybe<TermAggregateInput>>>;
@@ -172,6 +177,7 @@ export type Mutation = {
   deleteAll?: Maybe<DeleteAllMutationResponse>;
   /** Creates or updates a document in an index. */
   index?: Maybe<DocumentMutationResponse>;
+  tracker?: Maybe<Tracker>;
 };
 
 
@@ -209,6 +215,14 @@ export type NearestInput = {
   text: Scalars['String']['input'];
 };
 
+/** Meta data for search query */
+export type OptionsInput = {
+  /** Fields to exclude in the search result */
+  excludeFields?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** Fields to include in the search result */
+  includeFields?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
 export type OrderBy = {
   direction?: OrderByDirection;
   field: Scalars['String']['input'];
@@ -219,6 +233,17 @@ export enum OrderByDirection {
   Asc = 'asc',
   Desc = 'desc'
 }
+
+export type Page = {
+  referrer: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  url: Scalars['String']['input'];
+};
+
+export type PageViewData = {
+  documentID: Scalars['String']['input'];
+  page: Page;
+};
 
 export type Query = {
   __typename?: 'Query';
@@ -239,6 +264,7 @@ export type QueryFindArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   meta?: InputMaybe<MetaInput>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+  options?: InputMaybe<OptionsInput>;
   orderBy?: InputMaybe<Array<InputMaybe<OrderBy>>>;
   query: Scalars['String']['input'];
   searchAfter?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -326,6 +352,23 @@ export enum Semantic_Search_Type {
   Basic = 'BASIC'
 }
 
+export type Search = {
+  filters: Array<SearchFilters>;
+  query: Scalars['String']['input'];
+  results: SearchResults;
+  sort: SearchSort;
+};
+
+export type SearchClickData = {
+  documentID: Scalars['String']['input'];
+  page: Page;
+  search: Search;
+};
+
+export type SearchData = {
+  search: Search;
+};
+
 export type SearchDocument = {
   __typename?: 'SearchDocument';
   /** Document data */
@@ -344,6 +387,11 @@ export type SearchField = {
   name: Scalars['String']['input'];
   /** Field weight. It could affect the order the documents are returned */
   weight?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type SearchFilters = {
+  filterName: Scalars['String']['input'];
+  items: Array<Scalars['String']['input']>;
 };
 
 /** Search Option Input */
@@ -369,6 +417,19 @@ export type SearchResult = {
   total?: Maybe<Scalars['Int']['output']>;
 };
 
+export type SearchResultItems = {
+  documentID: Scalars['String']['input'];
+  page: Page;
+};
+
+export type SearchResults = {
+  items: Array<SearchResultItems>;
+};
+
+export type SearchSort = {
+  name: Scalars['String']['input'];
+};
+
 export type SearchTermData = {
   __typename?: 'SearchTermData';
   numberOfSearches: Scalars['Int']['output'];
@@ -378,6 +439,7 @@ export type SearchTermData = {
 export type SemanticSearchConfig = {
   __typename?: 'SemanticSearchConfig';
   chunking?: Maybe<ChunkingConfigType>;
+  fieldLimit: Scalars['Int']['output'];
   fields: Array<Scalars['String']['output']>;
   type?: Maybe<Semantic_Search_Type>;
 };
@@ -396,12 +458,18 @@ export type SemanticSearchInput = {
   type?: InputMaybe<Semantic_Search_Type>;
 };
 
+export type Session = {
+  country?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['String']['input'];
+};
+
 export type SimilarityInput = {
   filter?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   minScore?: InputMaybe<Scalars['Float']['input']>;
   nearest: NearestInput;
   offset?: InputMaybe<Scalars['Int']['input']>;
+  options?: InputMaybe<OptionsInput>;
 };
 
 export type SimilarityOutput = {
@@ -426,6 +494,34 @@ export type TermOutput = {
   __typename?: 'TermOutput';
   count: Scalars['Int']['output'];
   term: Scalars['String']['output'];
+};
+
+export type Tracker = {
+  __typename?: 'Tracker';
+  trackPageView: MutationResponse;
+  trackSearch: MutationResponse;
+  trackSearchClick: MutationResponse;
+};
+
+
+export type TrackerTrackPageViewArgs = {
+  data: PageViewData;
+  session: Session;
+  userID: Scalars['String']['input'];
+};
+
+
+export type TrackerTrackSearchArgs = {
+  data: SearchData;
+  session: Session;
+  userID: Scalars['String']['input'];
+};
+
+
+export type TrackerTrackSearchClickArgs = {
+  data: SearchClickData;
+  session: Session;
+  userID: Scalars['String']['input'];
 };
 
 export type TrendingDocument = {

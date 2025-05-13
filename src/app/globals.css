@@ -2,83 +2,28 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-@keyframes slideInFromBottom {
-  0% {
-    transform: translateY(100%);
-    opacity: 0;
-  }
 
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
+.gemini-text {
+  font-family: Google Sans, Helvetica Neue, sans-serif;
+  /* Choose a font that matches, Arial is a common sans-serif */
+  /* font-size: 100px; */
+  /* Adjust size as needed */
+  /* Gradient: Adjust colors and angles as needed */
+  background: linear-gradient(to right, #6B50D2, #C25CB6, #EA668A);
+  /*
+    Color Hex codes approximated from the image:
+    Left (Blue-Purple): #6B50D2
+    Middle (Pink-Purple): #C25CB6
+    Right (Reddish-Pink): #EA668A
+  */
 
-.slide-in-bottom {
-  animation: slideInFromBottom 0.3s ease-out;
-}
+  /* Crucial properties for text gradient */
+  -webkit-background-clip: text;
+  /* For Safari/Chrome */
+  background-clip: text;
+  color: transparent;
+  /* Makes the original text color transparent */
 
-.input-glow {
-  box-shadow: 0 0 3px #b2bfd7, 0 0 5px #b2bfd7;
-}
-
-.input-glow:hover {
-  box-shadow: 0 0 5px #87f4f6, 0 0 10px #8b9ebe;
-}
-
-.message-glow {
-  box-shadow: 0 0 3px #b2bfd7, 0 0 5px #b2bfd7;
-}
-
-.message-glow:hover {
-  box-shadow: 0 0 3px #75e7e9, 0 0 4px #8b9ebe;
-}
-
-@keyframes glimmer {
-  0% {
-    background-position: -200px;
-  }
-
-  100% {
-    background-position: calc(200px + 100%);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.shimmer {
-  animation: glimmer 2s infinite linear;
-  background: rgb(82, 82, 91);
-  background: linear-gradient(to right,
-      darkgray 10%,
-      rgb(130, 129, 129) 50%,
-      rgba(124, 123, 123, 0.816) 90%);
-  background-size: 200px 100%;
-  background-repeat: no-repeat;
-  /* color: transparent; */
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    color: white;
-  }
-
-  50% {
-    color: #f59e0b;
-    /* Tailwind's yellow-500 */
-  }
-}
-
-.animate-pulse-once {
-  animation: pulse 5s cubic-bezier(0, 0, 0.2, 1) 1;
+  /* Optional: A slight text shadow can make it pop on some backgrounds */
+  /* text-shadow: 2px 2px 4px rgba(0,0,0,0.1); */
 }

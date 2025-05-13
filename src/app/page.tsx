@@ -21,7 +21,7 @@ const Page: React.FC = () => {
 
   return (
     <div className="flex flex-col justify-between h-screen bg-white mx-auto max-w-full">
-      <div className="flex w-full flex-grow overflow-hidden relative">
+      <div className="flex w-full flex-grow overflow-hidden relative bg-slate-950">
         <Chat
           input={input}
           handleInputChange={handleInputChange}

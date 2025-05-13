@@ -9,20 +9,26 @@ export default function Messages({ messages }: { messages: Message[] }) {
   }, [messages]);
   return (
     <div
-      className="border-1 border-gray-100 overflow-y-scroll flex-grow flex-col justify-end p-1"
+      className="overflow-y-scroll flex-grow p-1"
       style={{ scrollbarWidth: "none" }}
     >
       {messages.map((msg, index) => (
         <div
-          key={index}
+          key={msg.id || index}
           className={`${
-            msg.role === "assistant" ? "bg-green-500" : "bg-blue-500"
-          } my-2 p-3 shadow-md hover:shadow-lg transition-shadow duration-200 flex slide-in-bottom bg-blue-500 border border-gray-900 message-glow`}
+            msg.role === "assistant"
+              ? "bg-slate-700 w-full " // Assistant: full width
+              : "bg-blue-700 ml-auto w-fit" // User: fit content width, right aligned
+          } my-2 p-3 my-5  hover:shadow-lg transition-shadow duration-200 flex items-center rounded-lg`}
         >
-          <div className="ml- rounded-tl-lg  p-2 border-r flex items-center">
+          <div className="p-2 border-r self-stretch">
             {msg.role === "assistant" ? "🤖" : "🧒🏻"}
           </div>
-          <div className="ml-2 text-white">
+          <div
+            className={`ml-2 ${
+              msg.role === "assistant" ? "text-gray-100" : "text-gray-100"
+            }`}
+          >
             <ReactMarkdown>{msg.content}</ReactMarkdown>
           </div>
         </div>

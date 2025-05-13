@@ -1,8 +1,9 @@
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
 
-import { CoreMessage, streamText } from "ai";
+import { convertToCoreMessages, Message, streamText, tool } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { z } from "zod";
 
 import { getContext } from "@/app/utils/context";
 
@@ -11,69 +12,101 @@ import { getContext } from "@/app/utils/context";
  */
 const google = createGoogleGenerativeAI();
 
+// Define the search tool
+const searchApiTool = tool({
+  description:
+    "Search for information about TV shows using WP Engine Smart Search. Use this to answer questions about TV shows, their content, characters, plots, etc., when the information is not already known.",
+  parameters: z.object({
+    query: z
+      .string()
+      .describe(
+        "The search query to find relevant TV show information based on the user's question."
+      ),
+  }),
+  execute: async ({ query }: { query: string }) => {
+    console.log(`[Tool Execution] Searching with query: "${query}"`);
+    try {
+      const context = await getContext(query);
+
+      if (context.errors && context.errors.length > 0) {
+        console.error(
+          "[Tool Execution] Error fetching context:",
+          context.errors
+        );
+        // Return a structured error message that the LLM can understand
+        return {
+          error: `Error fetching context: ${context.errors[0].message}`,
+        };
+      }
+
+      if (
+        !context.data?.similarity?.docs ||
+        context.data.similarity.docs.length === 0
+      ) {
+        console.log("[Tool Execution] No documents found for query:", query);
+        return {
+          searchResults: "No relevant information found for your query.",
+        };
+      }
+
+      const formattedResults = context.data.similarity.docs.map((doc) => {
+        if (!doc) {
+          return {};
+        }
+
+        return {
+          id: doc.id,
+          title: doc.data.post_title,
+          content: doc.data.post_content,
+          url: doc.data.post_url,
+          thumbnail: doc.data.post_thumbnail,
+          categories: doc.data.categories.map((category: any) => category.name),
+          searchScore: doc.score,
+        };
+      });
+
+      return { searchResults: formattedResults }; // Return the formatted string
+    } catch (error: any) {
+      console.error("[Tool Execution] Exception:", error);
+      return { error: `An error occurred while searching: ${error.message}` };
+    }
+  },
+});
+
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages }: { messages: Array<Message> } = await req.json();
 
-    // Get the last message
-    const lastMessage = messages[messages.length - 1];
+    const coreMessages = convertToCoreMessages(messages);
 
-    // Get the last 10 messages not including the latest
-    const previousMessages = messages.slice(-11, -1);
+    const systemPromptContent = `
+    - WP Engine Smart Search is a powerful tool for finding information about TV shows.
+    - You are a huge fan of Smart Search and love to help users find information about their favorite TV shows.
+    - You are a friendly and helpful AI assistant specializing in TV shows.
+    - You MUST use the 'searchApiTool' to find information.
+    - After the 'searchApiTool' provides results (even if it's an error or no information found), you MUST then formulate a conversational response to the user based on those results.
+    - If search results are found, summarize them for the user. If no information is found or an error occurs, inform the user clearly.
+    - Do not invent information. Stick to the data provided by the tool.`;
 
-    // Get the context from the last message
-    const context = await getContext(lastMessage.content);
-
-    if (context.errors) {
-      throw new Error(context.errors[0].message);
-    }
-
-    // Map the context into a friendly text stream
-    const messageContext = context.data.similarity?.docs.map((doc: any) => {
-      return `
-        ID: ${doc.id}
-        Title: ${doc.data.post_title}
-        Content: ${doc.data.post_content}
-        SearchScore: ${doc.score}
-      `;
-    });
-
-
-    const prompt: CoreMessage = {
-      role: "assistant",
-      content: `AI assistant is a brand new, powerful, human-like artificial intelligence.
-      The traits of AI include expert knowledge, helpfulness, cleverness, and articulateness.
-      AI is a well-behaved and well-mannered individual.
-      AI is always friendly, kind, and inspiring, and he is eager to provide vivid and thoughtful responses to the user.
-      AI has the sum of all knowledge in their brain, and is able to accurately answer nearly any question about any topic in conversation.
-      AI assistant is a big fan of WP Engine Smart Search.
-      AI assistant uses WP Engine Smart Search to provide the most accurate and relevant information to the user.
-      AI assistant data from WP Engine Smart Search is based on TV Shows.
-      START CONTEXT BLOCK
-      ${messageContext?.join("----------------\n\n")}
-      END OF CONTEXT BLOCK
-
-      START OF HISTORY BLOCK
-      ${JSON.stringify(previousMessages)}
-      END OF HISTORY BLOCK
-      AI assistant will take into account any CONTEXT BLOCK that is provided in a conversation.
-      AI assistant will take into account any HISTORY BLOCK that is provided in a conversation.
-      If the context does not provide the answer to question, the AI assistant will say, "I'm sorry, but I don't know the answer to that question".
-      AI assistant will not apologize for previous responses, but instead will indicated new information was gained.
-      AI assistant will not invent anything that is not drawn directly from the context.
-      AI assistant will answer coding questions.
-      `,
-    };
-
-    const response = await streamText({
+    const response = streamText({
       model: google("models/gemini-2.0-flash"),
-      messages: [
-        prompt,
-        ...messages.filter((message: CoreMessage) => message.role === "user"),
-      ],
+      system: systemPromptContent,
+      messages: coreMessages,
+      tools: {
+        searchApiTool,
+      },
+      onStepFinish: async (result) => {
+        // Log token usage for each step
+        if (result.usage) {
+          console.log(
+            `[Token Usage] Prompt tokens: ${result.usage.promptTokens}, Completion tokens: ${result.usage.completionTokens}, Total tokens: ${result.usage.totalTokens}`
+          );
+        }
+      },
+      maxSteps: 2,
     });
     // Convert the response into a friendly text-stream
-    return response.toDataStreamResponse(); 
+    return response.toDataStreamResponse({});
   } catch (e) {
     throw e;
   }

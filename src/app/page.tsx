@@ -7,17 +7,17 @@ const Page: React.FC = () => {
   const { messages, input, handleInputChange, handleSubmit, setMessages } =
     useChat();
 
-  useEffect(() => {
-    if (messages.length < 1) {
-      setMessages([
-        {
-          role: "assistant",
-          content: "Welcome to the Smart Search chatbot!",
-          id: "welcome",
-        },
-      ]);
-    }
-  }, [messages, setMessages]);
+  // useEffect(() => {
+  //   if (messages.length < 1) {
+  //     setMessages([
+  //       {
+  //         role: "assistant",
+  //         content: "Welcome to the Smart Search chatbot!",
+  //         id: "welcome",
+  //       },
+  //     ]);
+  //   }
+  // }, [messages, setMessages]);
 
   return (
     <div className="flex flex-col justify-between h-screen bg-white mx-auto max-w-full">

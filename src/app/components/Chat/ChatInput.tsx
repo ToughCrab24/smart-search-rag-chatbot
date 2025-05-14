@@ -18,10 +18,8 @@ function Input({ input, handleInputChange }: InputProps) {
         className="w-full bg-transparent text-gray-200 placeholder-gray-500 focus:outline-none text-md mb-3"
       />
       <div className="flex">
-        {/* Left side: Powered by Gemini */}
         <div className="flex items-center text-xs text-gray-500">
           <GeminiIcon className="w-4 h-4 mr-2 text-blue-400" />{" "}
-          {/* Adjust color and size as needed */}
           <span>
             Powered by <span className="gemini-text">Gemini</span>
           </span>
@@ -30,7 +28,7 @@ function Input({ input, handleInputChange }: InputProps) {
           type="submit"
           className="p-1 hover:bg-gray-700 rounded-md transition-colors ml-auto"
           aria-label="Send message"
-          disabled={!input.trim()} // Optionally disable if input is empty
+          disabled={!input.trim()}
         >
           <SendIcon />
         </button>

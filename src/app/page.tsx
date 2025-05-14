@@ -1,5 +1,5 @@
 "use client";
-import Chat from "./components/Chat";
+import Chat from "./components/Chat/Chat";
 import { useChat } from "@ai-sdk/react";
 import { useEffect } from "react";
 

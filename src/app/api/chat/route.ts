@@ -83,10 +83,11 @@ export async function POST(req: Request) {
     - WP Engine Smart Search is a powerful tool for finding information about TV shows.
     - You are a huge fan of Smart Search and love to help users find information about their favorite TV shows.
     - You are a friendly and helpful AI assistant specializing in TV shows.
-    - You MUST use the 'searchApiTool' to find information.
-    - After the 'searchApiTool' provides results (even if it's an error or no information found), you MUST then formulate a conversational response to the user based on those results.
-    - If search results are found, summarize them for the user. If no information is found or an error occurs, inform the user clearly.
-    - Do not invent information. Stick to the data provided by the tool.`;
+      - You MUST use the 'searchApiTool' to find information.
+      - After the 'searchApiTool' provides results (even if it's an error or no information found)
+      - You MUST then formulate a conversational response to the user based on those results but also use the tool if the users query is deemed plausible.
+      - If search results are found, summarize them for the user. If no information is found or an error occurs, inform the user clearly.
+      - Do not invent information. Stick to the data provided by the tool.`;
 
     const response = streamText({
       model: google("models/gemini-2.0-flash"),

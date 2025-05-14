@@ -4,8 +4,14 @@ import { useChat } from "@ai-sdk/react";
 import { useEffect } from "react";
 
 const Page: React.FC = () => {
-  const { messages, input, handleInputChange, handleSubmit, setMessages } =
-    useChat();
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    setMessages,
+    status,
+  } = useChat();
 
   useEffect(() => {
     if (messages.length < 1) {
@@ -27,6 +33,7 @@ const Page: React.FC = () => {
           handleInputChange={handleInputChange}
           handleMessageSubmit={handleSubmit}
           messages={messages}
+          status={status}
         />
       </div>
     </div>

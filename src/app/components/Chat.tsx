@@ -21,9 +21,7 @@ const SendIcon = () => (
   </svg>
 );
 
-// Placeholder for the Gemini Logo - REPLACE THIS with the actual Gemini logo SVG
 const GeminiLogoPlaceholder = ({ className }: { className: string }) => (
-  // Placeholder for the Gemini Logo - REPLACE THIS with the actual Gemini logo SVG
   <svg
     className={className}
     viewBox="0 0 24 24"
@@ -84,17 +82,45 @@ interface Chat {
   handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleMessageSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   messages: Message[];
+  status: "submitted" | "streaming" | "ready" | "error";
 }
+
+const LoadingIcon: React.FC = () => (
+  <div className="flex items-center justify-left text-white text-sm mt-2 pl-2 flex-grow">
+    <svg
+      className="animate-spin h-8 w-8 mr-2 text-gray-400"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  </div>
+);
 
 const Chat: React.FC<Chat> = ({
   input,
   handleInputChange,
   handleMessageSubmit,
   messages,
+  status,
 }) => {
   return (
     <div id="chat" className="flex flex-col w-full mx-2">
       <Messages messages={messages} />
+      {status === "submitted" && <LoadingIcon />}
       <form
         onSubmit={handleMessageSubmit}
         className="ml-1 mt-5 mb-5 relative rounded-lg"

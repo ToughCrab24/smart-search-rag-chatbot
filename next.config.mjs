@@ -5,7 +5,12 @@ const nextConfig = {
     return [
       {
         source: "/api/chat",
-        headers: [],
+        headers: [
+          {
+            key: "X-Accel-Buffering",
+            value: "no",
+          },
+        ],
       },
     ];
   },

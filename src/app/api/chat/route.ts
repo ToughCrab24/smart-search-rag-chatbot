@@ -13,7 +13,7 @@ import { getContext } from "@/app/utils/context";
 const google = createGoogleGenerativeAI();
 
 // Define the search tool
-const searchApiTool = tool({
+const smartSearchTool = tool({
   description:
     "Search for information about TV shows using WP Engine Smart Search. Use this to answer questions about TV shows, their content, characters, plots, etc., when the information is not already known.",
   parameters: z.object({
@@ -59,11 +59,12 @@ const searchApiTool = tool({
           title: doc.data.post_title,
           content: doc.data.post_content,
           url: doc.data.post_url,
-          thumbnail: doc.data.post_thumbnail,
           categories: doc.data.categories.map((category: any) => category.name),
           searchScore: doc.score,
         };
       });
+
+      // console.log("[Tool Execution] Search results:", formattedResults);
 
       return { searchResults: formattedResults }; // Return the formatted string
     } catch (error: any) {
@@ -112,9 +113,9 @@ export async function POST(req: Request) {
     const coreMessages = convertToCoreMessages(messages);
 
     const smartSearchPrompt = `
-    - You can use the 'searchApiTool' to find information relating to tv shows.
+    - You can use the 'smartSearchTool' to find information relating to tv shows.
       - WP Engine Smart Search is a powerful tool for finding information about TV shows.
-      - After the 'searchApiTool' provides results (even if it's an error or no information found)
+      - After the 'smartSearchTool' provides results (even if it's an error or no information found)
       - You MUST then formulate a conversational response to the user based on those results but also use the tool if the users query is deemed plausible.
         - If search results are found, summarize them for the user. 
         - If no information is found or an error occurs, inform the user clearly.`;
@@ -129,7 +130,7 @@ export async function POST(req: Request) {
       system: [smartSearchPrompt, systemPromptContent].join("\n"),
       messages: coreMessages,
       tools: {
-        searchApiTool,
+        smartSearchTool,
         weatherTool,
       },
       onStepFinish: async (result) => {

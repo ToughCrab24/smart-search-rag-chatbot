@@ -126,7 +126,7 @@ export async function POST(req: Request) {
 
     const response = streamText({
       model: google("models/gemini-2.0-flash"),
-      system: smartSearchPrompt + "\n" + systemPromptContent,
+      system: [smartSearchPrompt, systemPromptContent].join("\n"),
       messages: coreMessages,
       tools: {
         searchApiTool,

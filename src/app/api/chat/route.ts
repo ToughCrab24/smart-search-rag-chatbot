@@ -73,28 +73,64 @@ const searchApiTool = tool({
   },
 });
 
+const weatherTool = tool({
+  description:
+    "Get the current weather information for a specific location. Use this to answer questions about the weather in different cities.",
+  parameters: z.object({
+    location: z
+      .string()
+      .describe(
+        "The location for which to get the current weather information."
+      ),
+  }),
+  execute: async ({ location }: { location: string }) => {
+    console.log(`[Tool Execution] Getting weather for location: "${location}"`);
+    try {
+      // Simulate fetching weather data
+      const weatherData = {
+        location,
+        temperature: "22°C",
+        condition: "Sunny",
+        humidity: "60%",
+        windSpeed: "15 km/h",
+      };
+      const formattedWeather = `The current weather in ${weatherData.location} is ${weatherData.temperature} with ${weatherData.condition}. Humidity is at ${weatherData.humidity} and wind speed is ${weatherData.windSpeed}.`;
+      return { weather: formattedWeather };
+    } catch (error: any) {
+      console.error("[Tool Execution] Exception:", error);
+      return {
+        error: `An error occurred while fetching weather data: ${error.message}`,
+      };
+    }
+  },
+});
+
 export async function POST(req: Request) {
   try {
     const { messages }: { messages: Array<Message> } = await req.json();
 
     const coreMessages = convertToCoreMessages(messages);
 
-    const systemPromptContent = `
-    - WP Engine Smart Search is a powerful tool for finding information about TV shows.
-    - You are a huge fan of Smart Search and love to help users find information about their favorite TV shows.
-    - You are a friendly and helpful AI assistant specializing in TV shows.
-      - You MUST use the 'searchApiTool' to find information.
+    const smartSearchPrompt = `
+    - You can use the 'searchApiTool' to find information relating to tv shows.
+      - WP Engine Smart Search is a powerful tool for finding information about TV shows.
       - After the 'searchApiTool' provides results (even if it's an error or no information found)
       - You MUST then formulate a conversational response to the user based on those results but also use the tool if the users query is deemed plausible.
-      - If search results are found, summarize them for the user. If no information is found or an error occurs, inform the user clearly.
-      - Do not invent information. Stick to the data provided by the tool.`;
+        - If search results are found, summarize them for the user. 
+        - If no information is found or an error occurs, inform the user clearly.`;
+
+    const systemPromptContent = `
+    - You are a friendly and helpful AI assistant 
+    - You can use the 'weatherTool' to provide current weather information for a specific location.
+    - Do not invent information. Stick to the data provided by the tool.`;
 
     const response = streamText({
       model: google("models/gemini-2.0-flash"),
-      system: systemPromptContent,
+      system: smartSearchPrompt + "\n" + systemPromptContent,
       messages: coreMessages,
       tools: {
         searchApiTool,
+        weatherTool,
       },
       onStepFinish: async (result) => {
         // Log token usage for each step
@@ -104,7 +140,7 @@ export async function POST(req: Request) {
           );
         }
       },
-      maxSteps: 2,
+      maxSteps: 5,
     });
     // Convert the response into a friendly text-stream
     return response.toDataStreamResponse({});

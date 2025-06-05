@@ -1,6 +1,5 @@
 import { ChangeEvent } from "react";
 import SendIcon from "../Icons/SendIcon";
-import GeminiIcon from "../Icons/GeminiIcon";
 
 interface InputProps {
   input: string;
@@ -18,12 +17,6 @@ function Input({ input, handleInputChange }: InputProps) {
         className="w-full bg-transparent text-gray-200 placeholder-gray-500 focus:outline-none text-md mb-3"
       />
       <div className="flex">
-        <div className="flex items-center text-xs text-gray-500">
-          <GeminiIcon className="w-4 h-4 mr-2 text-blue-400" />{" "}
-          <span>
-            Powered by <span className="gemini-text">Gemini</span>
-          </span>
-        </div>
         <button
           type="submit"
           className="p-1 hover:bg-gray-700 rounded-md transition-colors ml-auto"

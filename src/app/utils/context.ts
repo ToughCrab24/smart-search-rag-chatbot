@@ -14,6 +14,7 @@ type Response = {
   data: {
     similarity: Similarity;
   };
+  errors?: Array<{ message: string }>;
 };
 
 // The function `getContext` is used to retrieve the context of a given message

@@ -12,8 +12,17 @@ export async function POST(req: Request) {
 
   console.log("Received messages:", messages);
   const result = streamText({
-    model: google("models/gemini-1.5-flash-latest"),
-    system: `You are a search summarization engine. Use the 'smartSearchTool' to find information about TV shows. After the tool returns results, create a well-formatted summary for the user using Markdown. For each show mentioned, include a reference link to the source using the 'url' provided in the tool's output. Use headings, lists, and bold text to make the summary easy to read. If no information is found, simply state that. Do not include any conversational elements in your response. Do not output JSON.`,
+    model: google("models/gemini-2.0-flash-latest"),
+    system: `
+      You are a search summarization engine.
+      Use the 'smartSearchTool' to find information about TV shows.
+      After the tool returns results, create a well-formatted summary for the user using Markdown.
+      For each show mentioned, include a reference link to the source using the 'url' provided in the tool's output.
+      Use headings, lists, and bold text to make the summary easy to read.
+      If no information is found, simply state that.
+      Do not include any conversational elements in your response.
+      Do not output JSON.
+    `,
     messages: messages,
     tools: {
       smartSearchTool,
@@ -23,4 +32,3 @@ export async function POST(req: Request) {
 
   return result.toDataStreamResponse();
 }
-

@@ -2,7 +2,6 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-
 .gemini-text {
   font-family: Google Sans, Helvetica Neue, sans-serif;
   /* Choose a font that matches, Arial is a common sans-serif */

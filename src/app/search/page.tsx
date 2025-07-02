@@ -7,10 +7,16 @@ import ReactMarkdown from "react-markdown";
 import SearchResults from "../components/Search/SearchResults";
 
 export default function SearchPage() {
-  const { messages, input, handleInputChange, handleSubmit, setMessages } =
-    useChat({
-      api: "/api/summarize",
-    });
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    setMessages,
+    isLoading,
+  } = useChat({
+    api: "/api/summarize",
+  });
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -34,6 +40,9 @@ export default function SearchPage() {
     }
     return acc;
   }, [] as any[]);
+  console.log("Search Results:", messages);
+  const assistantMessage = messages.find((m) => m.role === "assistant");
+  const showSummary = isLoading || assistantMessage;
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
@@ -65,29 +74,49 @@ export default function SearchPage() {
           </button>
         </form>
 
-        {messages.find((m) => m.role === "assistant") && (
+        {showSummary && (
           <div
-            className={`relative p-4 mt-4 text-gray-900 bg-gray-100 rounded-md dark:bg-gray-700 dark:text-white cursor-pointer transition-all duration-500 ${
-              isExpanded ? "h-auto" : "h-32 overflow-hidden"
+            className={`mt-4 rounded-lg relative p-1 overflow-hidden ${
+              isLoading
+                ? "bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 [background-size:400%_400%] animate-border-snake"
+                : ""
             }`}
-            onClick={() => setIsExpanded(!isExpanded)}
           >
-            <div className={`prose dark:prose-invert max-w-none`}>
-              {messages.map((m) => (
-                <div key={m.id}>
-                  {m.role === "assistant" && (
-                    <ReactMarkdown>{m.content}</ReactMarkdown>
+            <div
+              className={`relative p-4 text-gray-900 bg-gray-100 rounded-md dark:bg-gray-700 dark:text-white transition-all duration-500 ${
+                assistantMessage ? "cursor-pointer" : ""
+              } ${
+                isExpanded || !assistantMessage
+                  ? "h-auto"
+                  : "h-32 overflow-hidden"
+              }`}
+              onClick={() => assistantMessage && setIsExpanded(!isExpanded)}
+            >
+              {assistantMessage ? (
+                <>
+                  <div className="prose dark:prose-invert max-w-none">
+                    {messages.map((m) => (
+                      <div key={m.id}>
+                        {m.role === "assistant" && (
+                          <ReactMarkdown>{m.content}</ReactMarkdown>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {!isExpanded && (
+                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-100 dark:from-gray-500 to-transparent flex items-center justify-center">
+                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-100">
+                        Click to expand
+                      </p>
+                    </div>
                   )}
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p>Generating summary...</p>
                 </div>
-              ))}
+              )}
             </div>
-            {!isExpanded && (
-              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-100 dark:from-gray-700 to-transparent flex items-center justify-center">
-                <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-                  Click to expand
-                </p>
-              </div>
-            )}
           </div>
         )}
 

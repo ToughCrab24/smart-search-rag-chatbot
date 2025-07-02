@@ -35,7 +35,7 @@ export const smartSearchTool = tool({
       ) {
         console.log("[Tool Execution] No documents found for query:", query);
         return {
-          searchResults: "No relevant information found for your query.",
+          searchResults: [],
         };
       }
 

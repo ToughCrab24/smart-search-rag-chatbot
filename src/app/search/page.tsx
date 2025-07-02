@@ -1,10 +1,11 @@
 "use client";
 
 import { useChat } from "ai/react";
-import { FormEvent, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import { FormEvent } from "react";
 
 import SearchResults from "../components/Search/SearchResults";
+import SummaryCard from "../components/Search/SummaryCard";
+import SearchForm from "../components/Search/SearchForm";
 
 export default function SearchPage() {
   const {
@@ -17,12 +18,10 @@ export default function SearchPage() {
   } = useChat({
     api: "/api/summarize",
   });
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessages([]);
-    setIsExpanded(false);
     handleSubmit(e);
   };
 
@@ -40,9 +39,8 @@ export default function SearchPage() {
     }
     return acc;
   }, [] as any[]);
-  console.log("Search Results:", messages);
+
   const assistantMessage = messages.find((m) => m.role === "assistant");
-  const showSummary = isLoading || assistantMessage;
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
@@ -50,81 +48,19 @@ export default function SearchPage() {
         <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
           Summarize Search Results
         </h1>
-        <form onSubmit={handleFormSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="search" className="sr-only">
-              Search
-            </label>
-            <input
-              id="search"
-              name="search"
-              type="text"
-              required
-              className="w-full px-3 py-2 text-gray-900 bg-gray-200 rounded-md dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your search query..."
-              value={input}
-              onChange={handleInputChange}
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Summarize
-          </button>
-        </form>
+        <SearchForm
+          input={input}
+          handleInputChange={handleInputChange}
+          handleFormSubmit={handleFormSubmit}
+        />
 
-        {showSummary && (
-          <div
-            className={`mt-4 rounded-lg relative p-1 overflow-hidden ${
-              isLoading
-                ? "bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 [background-size:400%_400%] animate-border-snake"
-                : ""
-            }`}
-          >
-            <div
-              className={`relative p-4 text-gray-900 bg-gray-100 rounded-md dark:bg-gray-700 dark:text-white transition-all duration-500 ${
-                assistantMessage ? "cursor-pointer" : ""
-              } ${
-                isExpanded || !assistantMessage
-                  ? "h-auto"
-                  : "h-32 overflow-hidden"
-              }`}
-              onClick={() => assistantMessage && setIsExpanded(!isExpanded)}
-            >
-              {assistantMessage ? (
-                <>
-                  <div className="prose dark:prose-invert max-w-none">
-                    {messages.map((m) => (
-                      <div key={m.id}>
-                        {m.role === "assistant" && (
-                          <ReactMarkdown>{m.content}</ReactMarkdown>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  {!isExpanded && (
-                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-100 dark:from-gray-500 to-transparent flex items-center justify-center">
-                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-100">
-                        Click to expand
-                      </p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <p>Generating summary...</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        <SummaryCard
+          isLoading={isLoading}
+          assistantMessage={assistantMessage}
+          messages={messages}
+        />
 
-        {searchResults.length > 0 && (
-          <div className="mt-8">
-            <SearchResults results={searchResults} />
-          </div>
-        )}
+        <SearchResults results={searchResults} isLoading={isLoading} />
       </div>
     </div>
   );

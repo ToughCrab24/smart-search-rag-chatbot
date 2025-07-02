@@ -22,13 +22,14 @@ export const getContext = async (message: string): Promise<Response> => {
   const url = process.env.SMART_SEARCH_URL ?? "";
   const token = process.env.SMART_SEARCH_ACCESS_TOKEN ?? "";
 
-  const query = `query GetContext($message: String!, $field: String!) {
+  const query = `query GetContext($message: String!, $field: String!, $minScore: Float!) {
     similarity(
       input: {
         nearest: {
           text: $message,
           field: $field
         }
+        minScore: $minScore
       }) {
       total
       docs {
@@ -42,6 +43,7 @@ export const getContext = async (message: string): Promise<Response> => {
   const variables = {
     message,
     field: "post_content",
+    minScore: 0.8, // Adjust this value based on your requirements
   };
 
   const response = await fetch(url, {

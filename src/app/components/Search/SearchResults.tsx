@@ -17,7 +17,7 @@ export default function SearchResults({
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           Searching...
         </h2>
-        <div className="grid grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 gap-4 mt-4">
           {[...Array(3)].map((_, i) => (
             <LoadingCard key={i} />
           ))}
@@ -35,7 +35,7 @@ export default function SearchResults({
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
         Search Results
       </h2>
-      <div className="grid grid-cols-3 gap-4 mt-4">
+      <div className="grid grid-cols-1 gap-4 mt-4">
         {results.map((result: any, index: number) => (
           <SearchResultCard key={index} result={result} />
         ))}

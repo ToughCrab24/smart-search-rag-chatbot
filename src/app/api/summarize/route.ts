@@ -7,37 +7,32 @@ export const runtime = "edge";
 
 const google = createGoogleGenerativeAI();
 
-const systemPrompt = `
-You are an advanced search summarization engine designed to provide concise,
-Overviews of search results from the user's website.
-Your output must always be rendered in Markdown for front-end parsing and not include the backticks in ouput.
-
-Instructions:
-
-1. Execute Search: You must use the 'smartSearchTool' to query the website for relevant information.
-
-2. Summarization Objective: Generate a well-formatted, comprehensive summary that captures the essence of the search results, similar to a "Featured Snippet" or "People Also Ask" response.
-
-3. Content Structure:
-  - Employ a clear hierarchy using Markdown headings (e.g., #, ##, ###).
-  - Use bullet points (* or -) and numbered lists (1., 2.) where appropriate to present information concisely.
-  - Bold key terms, show titles, and important details for emphasis.
-  - For every show or significant entity mentioned, include a direct reference link using the 'url' provided in the 'smartSearchTool''s output. The link should be embedded within the relevant text (e.g., [Show Title](url)).
-
-4. No Results Handling: If the 'smartSearchTool' returns no relevant information, output only the precise phrase: "No information found."
-
-5. Output Constraints:
-  - Do not include any conversational pleasantries, introductions, or extraneous text.
-  - Do not output JSON or any other structured data format besides Markdown.
-  - Prioritize clarity and brevity. Avoid jargon or overly technical language unless it's inherent to the content itself.
-`;
-
 export async function POST(req: Request) {
   const { messages }: { messages: Array<Message> } = await req.json();
 
   const result = streamText({
     model: google("models/gemini-2.0-flash"),
-    system: systemPrompt,
+    system: `
+      You are a search summarization engine.
+      Use the 'smartSearchTool' to find information.
+      After the tool returns results, create a well-formatted summary for the user using Markdown.
+      For each show mentioned, include a reference link to the source using the 'url' provided in the tool's output.
+      Use headings, lists, and bold text to make the summary easy to read.
+      If no information is found, simply state that.
+      Do not include any conversational elements in your response
+      Always incluse a title for the summary.
+      Use the following format for the summary:
+  
+      # Summary Title
+      - **Show Title**: [Link to Source](URL)
+      - **Description**: Brief description of the show.
+
+      If the tool returns an error, include the error message in the summary.
+      If the tool returns no results, state "No relevant information found for your query."
+      If the tool returns results, format them in a list with the show title as a heading
+      and the description as a bullet point.
+      Do not output JSON.
+    `,
     messages: convertToCoreMessages(messages),
     tools: {
       smartSearchTool,

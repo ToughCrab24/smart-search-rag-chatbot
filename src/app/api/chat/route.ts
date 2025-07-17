@@ -1,37 +1,10 @@
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
 
-import { convertToCoreMessages, Message, streamText, experimental_createMCPClient as createMCPClient } from "ai";
+import { convertToCoreMessages, Message, streamText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { StreamableHTTPClientTransport, StreamableHTTPClientTransportOptions } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-
-
 import { smartSearchTool, weatherTool } from "@/app/utils/tools";
-import { createFakeOAuthProvider } from "@/app/utils/fake-oauth-provider";
-
-// Function to create a new MCP client for each request with error handling
-const createMCPClientInstance = async () => {
-  try {
-    const client = await createMCPClient({
-      transport: new StreamableHTTPClientTransport(
-        new URL("http://localhost:3080/mcp"),
-        {
-          authProvider: createFakeOAuthProvider({
-            bearerToken: process.env.OAUTH_BEARER_TOKEN || "thisisafaketoken",
-          })
-        }
-      ),
-      onUncaughtError: (error) => {
-        console.error("Uncaught error in MCP client:", error);
-      }
-    });
-    return client;
-  } catch (error) {
-    console.error("Failed to create MCP client:", error);
-    return null;
-  }
-};
-
+import { createMCPClientInstance } from "@/app/utils/mcp/client";
 
 /**
  * Initialize the Google Generative AI API

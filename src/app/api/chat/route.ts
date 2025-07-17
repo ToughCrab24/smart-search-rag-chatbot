@@ -3,28 +3,31 @@ export const runtime = "edge";
 
 import { convertToCoreMessages, Message, streamText, experimental_createMCPClient as createMCPClient } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { StreamableHTTPClientTransport, StreamableHTTPClientTransportOptions } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 
 import { smartSearchTool, weatherTool } from "@/app/utils/tools";
+import { createFakeOAuthProvider } from "@/app/utils/fake-oauth-provider";
 
 // Function to create a new MCP client for each request with error handling
 const createMCPClientInstance = async () => {
   try {
-    console.log("Creating new MCP client instance...");
     const client = await createMCPClient({
       transport: new StreamableHTTPClientTransport(
-        new URL("http://localhost:3080/mcp")
+        new URL("http://localhost:3080/mcp"),
+        {
+          authProvider: createFakeOAuthProvider({
+            bearerToken: process.env.OAUTH_BEARER_TOKEN || "thisisafaketoken",
+          })
+        }
       ),
       onUncaughtError: (error) => {
         console.error("Uncaught error in MCP client:", error);
       }
     });
-    console.log("MCP client created successfully");
     return client;
   } catch (error) {
     console.error("Failed to create MCP client:", error);
-    // Return null if MCP client creation fails
     return null;
   }
 };
@@ -93,9 +96,12 @@ export async function POST(req: Request) {
       },
       maxSteps: 5,
     });
+
     // Convert the response into a friendly text-stream
     return response.toDataStreamResponse({});
   } catch (e) {
     throw e;
   }
 }
+  
+

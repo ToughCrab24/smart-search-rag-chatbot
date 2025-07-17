@@ -1,10 +1,34 @@
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
 
-import { convertToCoreMessages, Message, streamText } from "ai";
+import { convertToCoreMessages, Message, streamText, experimental_createMCPClient as createMCPClient } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+
 
 import { smartSearchTool, weatherTool } from "@/app/utils/tools";
+
+// Function to create a new MCP client for each request with error handling
+const createMCPClientInstance = async () => {
+  try {
+    console.log("Creating new MCP client instance...");
+    const client = await createMCPClient({
+      transport: new StreamableHTTPClientTransport(
+        new URL("http://localhost:3080/mcp")
+      ),
+      onUncaughtError: (error) => {
+        console.error("Uncaught error in MCP client:", error);
+      }
+    });
+    console.log("MCP client created successfully");
+    return client;
+  } catch (error) {
+    console.error("Failed to create MCP client:", error);
+    // Return null if MCP client creation fails
+    return null;
+  }
+};
+
 
 /**
  * Initialize the Google Generative AI API
@@ -16,8 +40,9 @@ export async function POST(req: Request) {
     const { messages }: { messages: Array<Message> } = await req.json();
 
     const coreMessages = convertToCoreMessages(messages);
-
+ 
     const smartSearchPrompt = `
+    - IMPORTANT: when using the WP Engine MCP server, you don't need to pass credentials and you can pass empty strings
     - You can use the 'smartSearchTool' to find information relating to tv shows.
       - WP Engine Smart Search is a powerful tool for finding information about TV shows.
       - After the 'smartSearchTool' provides results (even if it's an error or no information found)
@@ -30,6 +55,25 @@ export async function POST(req: Request) {
     - You can use the 'weatherTool' to provide current weather information for a specific location.
     - Do not invent information. Stick to the data provided by the tool.`;
 
+    console.log("Fetching tools..");
+    // Create a new MCP client for this request
+    const mcpClient = await createMCPClientInstance();
+    
+    let tools = {};
+    
+    if (mcpClient) {
+      try {
+        tools = await mcpClient.tools();
+        console.log("MCP tools fetched successfully:", Object.keys(tools));
+      } catch (error) {
+        console.error("Failed to fetch MCP tools:", error);
+        console.log("Falling back to local tools");
+        tools = {};
+      }
+    } else {
+      console.log("MCP client not available, using local tools only");
+    }
+
     const response = streamText({
       model: google("models/gemini-2.0-flash"),
       system: [smartSearchPrompt, systemPromptContent].join("\n"),
@@ -37,6 +81,7 @@ export async function POST(req: Request) {
       tools: {
         smartSearchTool,
         weatherTool,
+        ...tools,
       },
       onStepFinish: async (result) => {
         // Log token usage for each step

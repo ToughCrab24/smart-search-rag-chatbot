@@ -64,34 +64,36 @@ export const smartSearchTool = tool({
   },
 });
 
-export const weatherTool = tool({
-  description:
-    "Get the current weather information for a specific location. Use this to answer questions about the weather in different cities.",
+export const displayWeather = tool({
+  description: "Display the weather for a location",
   parameters: z.object({
-    location: z
-      .string()
-      .describe(
-        "The location for which to get the current weather information."
-      ),
+    location: z.string().describe("The location to get the weather for"),
   }),
   execute: async ({ location }: { location: string }) => {
     console.log(`[Tool Execution] Getting weather for location: "${location}"`);
-    try {
-      // Simulate fetching weather data
-      const weatherData = {
-        location,
-        temperature: "22°C",
-        condition: "Sunny",
-        humidity: "60%",
-        windSpeed: "15 km/h",
-      };
-      const formattedWeather = `The current weather in ${weatherData.location} is ${weatherData.temperature} with ${weatherData.condition}. Humidity is at ${weatherData.humidity} and wind speed is ${weatherData.windSpeed}.`;
-      return { weather: formattedWeather };
-    } catch (error: any) {
-      console.error("[Tool Execution] Exception:", error);
-      return {
-        error: `An error occurred while fetching weather data: ${error.message}`,
-      };
-    }
+    
+    // Simulate fetching weather data with more variety for demo
+    const conditions = ["Sunny", "Cloudy", "Rainy", "Snowy", "Thunderstorm"];
+    const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
+    const randomTemp = Math.floor(Math.random() * 30) + 5; // 5-35°C
+    const randomHumidity = Math.floor(Math.random() * 40) + 40; // 40-80%
+    const randomWind = Math.floor(Math.random() * 20) + 5; // 5-25 km/h
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return {
+      location,
+      temperature: randomTemp,
+      condition: randomCondition,
+      humidity: randomHumidity,
+      windSpeed: randomWind,
+      description: `Current weather conditions in ${location}. Have a great day!`
+    };
   },
 });
+
+export const tools = {
+  smartSearchTool,
+  displayWeather,
+};

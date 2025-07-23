@@ -4,7 +4,7 @@ export const runtime = "edge";
 import { convertToCoreMessages, Message, streamText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-import { smartSearchTool, weatherTool } from "@/app/utils/tools";
+import { tools } from "@/app/utils/tools";
 
 /**
  * Initialize the Google Generative AI API
@@ -27,17 +27,15 @@ export async function POST(req: Request) {
 
     const systemPromptContent = `
     - You are a friendly and helpful AI assistant 
-    - You can use the 'weatherTool' to provide current weather information for a specific location.
+    - You can use the 'displayWeather' tool to provide current weather information for a specific location.
+    - When you call the displayWeather tool, it will automatically render a beautiful weather card UI component.
     - Do not invent information. Stick to the data provided by the tool.`;
 
     const response = streamText({
       model: google("models/gemini-2.0-flash"),
       system: [smartSearchPrompt, systemPromptContent].join("\n"),
       messages: coreMessages,
-      tools: {
-        smartSearchTool,
-        weatherTool,
-      },
+      tools,
       onStepFinish: async (result) => {
         // Log token usage for each step
         if (result.usage) {

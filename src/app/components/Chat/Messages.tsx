@@ -1,12 +1,51 @@
 import { Message } from "ai";
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
+import WeatherCard from "../WeatherCard";
 
 export default function Messages({ messages }: { messages: Message[] }) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const renderMessageContent = (msg: Message) => {
+    return (
+      <div>
+        <ReactMarkdown>{msg.content}</ReactMarkdown>
+
+        {/* Render tool invocations */}
+        <div>
+          {msg.toolInvocations?.map((toolInvocation) => {
+            const { toolName, toolCallId, state } = toolInvocation;
+
+            if (state === "result") {
+              if (toolName === "displayWeather") {
+                const { result } = toolInvocation;
+                return (
+                  <div key={toolCallId}>
+                    <WeatherCard weather={result} />
+                  </div>
+                );
+              }
+            } else {
+              return (
+                <div key={toolCallId}>
+                  {toolName === "displayWeather" ? (
+                    <div className="flex items-center space-x-2 my-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                      <span className="text-gray-300">Loading weather...</span>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            }
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
       className="overflow-y-scroll flex-grow p-1"
@@ -29,7 +68,7 @@ export default function Messages({ messages }: { messages: Message[] }) {
               msg.role === "assistant" ? "text-gray-100" : "text-gray-100"
             }`}
           >
-            <ReactMarkdown>{msg.content}</ReactMarkdown>
+            {renderMessageContent(msg)}
           </div>
         </div>
       ))}

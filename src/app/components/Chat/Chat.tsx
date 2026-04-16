@@ -2,15 +2,15 @@
 
 import React, { ChangeEvent } from "react";
 import Messages from "./Messages";
-import { Message } from "ai/react";
+import { UIMessage } from "ai";
 import LoadingIcon from "../Icons/LoadingIcon";
 import ChatInput from "./ChatInput";
 
 interface Chat {
   input: string;
   handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleMessageSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  messages: Message[];
+  handleMessageSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
+  messages: UIMessage[];
   status: "submitted" | "streaming" | "ready" | "error";
 }
 

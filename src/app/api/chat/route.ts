@@ -7,23 +7,20 @@ import {
   Message,
   streamText,
 } from "ai";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 
 import { weatherTool } from "@/app/utils/tools";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 const httpTransport = new StreamableHTTPClientTransport(
-  new URL(process.env.AI_TOOLKIT_MCP_URL || "http://localhost:8080/mcp")
+  new URL(process.env.AI_TOOLKIT_MCP_URL || "http://localhost:8080/mcp"),
 );
 
 const client = await experimental_createMCPClient({
   transport: httpTransport,
 });
 
-/**
- * Initialize the Google Generative AI API
- */
-const google = createGoogleGenerativeAI();
+const openai = createOpenAI();
 
 export async function POST(req: Request) {
   try {
@@ -46,11 +43,10 @@ export async function POST(req: Request) {
     - Do not invent information. Stick to the data provided by the tool.`;
 
     const response = streamText({
-      model: google("models/gemini-2.0-flash"),
+      model: openai("gpt-4o"),
       system: [smartSearchPrompt, systemPromptContent].join("\n"),
       messages: coreMessages,
       tools: {
-        // smartSearchTool,
         weatherTool,
         ...aiTkTools,
       },
@@ -58,9 +54,12 @@ export async function POST(req: Request) {
         // Log token usage for each step
         if (result.usage) {
           console.log(
-            `[Token Usage] Prompt tokens: ${result.usage.promptTokens}, Completion tokens: ${result.usage.completionTokens}, Total tokens: ${result.usage.totalTokens}`
+            `[Token Usage] Prompt tokens: ${result.usage.promptTokens}, Completion tokens: ${result.usage.completionTokens}, Total tokens: ${result.usage.totalTokens}`,
           );
         }
+      },
+      onError: (error) => {
+        console.error("Error during AI response generation:", error);
       },
       maxSteps: 5,
     });

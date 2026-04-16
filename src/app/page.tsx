@@ -18,7 +18,7 @@ const Page: React.FC = () => {
       setMessages([
         {
           role: "assistant",
-          content: "Welcome to the Smart Search chatbot!",
+          content: "What's up, DE{CODE}? Welcome to the Smart Search chatbot!",
           id: "welcome",
         },
       ]);

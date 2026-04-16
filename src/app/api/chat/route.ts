@@ -9,7 +9,6 @@ import {
 } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 
-import { weatherTool } from "@/app/utils/tools";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 const httpTransport = new StreamableHTTPClientTransport(
@@ -29,25 +28,20 @@ export async function POST(req: Request) {
 
     const coreMessages = convertToCoreMessages(messages);
 
-    const smartSearchPrompt = `
-    - You can use the 'search' tool to find information relating to tv shows.
-      - WP Engine Smart Search is a powerful tool for finding information about TV shows.
-      - After the 'smartSearchTool' provides results (even if it's an error or no information found)
-      - You MUST then formulate a conversational response to the user based on those results but also use the tool if the users query is deemed plausible.
-        - If search results are found, summarize them for the user. 
-        - If no information is found or an error occurs, inform the user clearly.`;
-
     const systemPromptContent = `
-    - You are a friendly and helpful AI assistant 
-    - You can use the 'weatherTool' to provide current weather information for a specific location.
-    - Do not invent information. Stick to the data provided by the tool.`;
+    - You are a helpful assistant that answers questions using ONLY data retrieved from the MCP tools.
+    - You have access to WP Engine Smart Search via two tools: 'search' and 'fetch'.
+      - Use the 'search' tool to find relevant tv show content across indexed data.
+      - Use the 'fetch' tool to retrieve the full content of a specific result returned by 'search'.
+      - Use 'search' first to discover relevant results, then 'fetch' to get detailed content when needed.
+    - You MUST base your responses solely on the data returned by these tools. Do not use prior knowledge or make up information.
+    - If no results are found or an error occurs, inform the user clearly. Do not guess or fabricate an answer.`;
 
     const response = streamText({
-      model: openai("gpt-4o"),
-      system: [smartSearchPrompt, systemPromptContent].join("\n"),
+      model: openai("gpt-4.1"),
+      system: systemPromptContent,
       messages: coreMessages,
       tools: {
-        weatherTool,
         ...aiTkTools,
       },
       onStepFinish: async (result) => {

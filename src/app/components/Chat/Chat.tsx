@@ -26,7 +26,15 @@ const Chat: React.FC<Chat> = ({
       <Messages messages={messages} />
       {status === "submitted" && <LoadingIcon />}
       <form
-        onSubmit={handleMessageSubmit}
+        onSubmit={(e) => {
+          e.preventDefault();
+          const sanitized = input
+            .replace(/[<>{}]/g, "")
+            .replace(/javascript:/gi, "")
+            .trim();
+          if (!sanitized) return;
+          handleMessageSubmit(e);
+        }}
         className="ml-1 mt-5 mb-5 relative rounded-lg"
       >
         <ChatInput input={input} handleInputChange={handleInputChange} />
